@@ -1,0 +1,11 @@
+﻿[*.{cs,vb}]
+
+# IDE0044: Добавить модификатор только для чтения
+dotnet_diagnostic.IDE0044.severity = none
+dotnet_code_quality_unused_parameters=all:silent
+
+# CS0649: Полю "MovingPlatform.smoothTime" нигде не присваивается значение, поэтому оно всегда будет иметь значение по умолчанию 0.
+dotnet_diagnostic.CS0649.severity = none
+
+[*.cs]
+csharp_style_unused_value_assignment_preference=discard_variable:silent
