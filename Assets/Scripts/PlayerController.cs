@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
 	private Vector3 rbMoveVector;
 	public bool onRb = false;
 	private float dist = 2.5f;
+	public bool isStanding;
 	[HideInInspector] public Rigidbody pulledRb = null;
 
 	[Header("Keys")]
@@ -37,7 +38,7 @@ public class PlayerController : MonoBehaviour
 	[Space]
 
 	[Header("Variables")]
-	[SerializeField] private bool isGrounded;
+	[SerializeField] public bool isGrounded;
 	[SerializeField] private float lookSens;
 	[SerializeField] private float walkSpeed;
 	[SerializeField] private float sprintSpeed;
@@ -103,15 +104,16 @@ public class PlayerController : MonoBehaviour
 		//	slopeMoveVector /= slopeMoveVector.magnitude;
 
 
+
 		if (IsGrounded())
 		{
 			if (moveVector == Vector3.zero)
             {
-				playerRb.useGravity = false;
+				isStanding = true;
             }
             else
             {
-				playerRb.useGravity = true;
+				isStanding = false;
             }
 			playerRb.AddForce(slopeMoveVector * moveSpeed, ForceMode.Acceleration);
 			//if (OnSlope() && slopeHit.normal.y < 0.6f)
@@ -121,7 +123,6 @@ public class PlayerController : MonoBehaviour
 		}
 		else
 		{
-			playerRb.useGravity = true;
 			playerRb.AddForce(moveVector * moveSpeed / 7f, ForceMode.Acceleration);
 		}
 	}
@@ -316,9 +317,6 @@ public class PlayerController : MonoBehaviour
 		RaycastHit hit;
 		Physics.Raycast(checkSphere.position, Vector3.down, out hit, 1f, rigidbodyMask, QueryTriggerInteraction.Ignore);
 		onRb = pulledRb == hit.rigidbody && pulledRb != null ? true : false; 
-		Debug.Log(pulledRb);
-		Debug.Log(hit.rigidbody);
-		Debug.Log(onRb);
 		//if (pulledRb == hit.rigidbody)
   //      {
 		//	onRb = true;
