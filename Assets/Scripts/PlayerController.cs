@@ -13,7 +13,6 @@ public class PlayerController : MonoBehaviour
 	private RaycastHit slopeHit;
 	private Vector3 slopeMoveVector;
 	private Vector3 moveVector;
-	private Vector3 rbMoveVector;
 	public bool onRb = false;
 	private float dist = 2.5f;
 	public bool isStanding;
@@ -46,18 +45,22 @@ public class PlayerController : MonoBehaviour
 	[SerializeField] private float jumpStrenght;
 
 
+    private void Awake()
+    {
+		Cursor.lockState = CursorLockMode.Locked;
+	}
 
-	void Start()
+    void Start()
 	{
 		playerRb = GetComponent<Rigidbody>();
-		Cursor.lockState = CursorLockMode.Locked;
+		
 	}
 
 	void FixedUpdate()
 	{
 		SprintMovement();
 		HandleMovement();
-		AirFall();
+		//AirFall();
 		Jump();
 		OnSlope();
 		DragControl();
@@ -84,10 +87,11 @@ public class PlayerController : MonoBehaviour
 
 	private void DebugCheck()
 	{
-		Debug.DrawRay(bodyCollider.bounds.center, playerRb.velocity, Color.green, 0.03f, false);
-		Debug.DrawRay(bodyCollider.bounds.center, moveVector, Color.red, 0.03f, false);
-		Debug.DrawRay(bodyCollider.bounds.center, -slopeHit.normal, Color.blue, 0.03f, false);
+		//Debug.DrawRay(bodyCollider.bounds.center, playerRb.velocity, Color.green, 0.03f, false);
+		//Debug.DrawRay(bodyCollider.bounds.center, moveVector, Color.red, 0.03f, false);
+		//Debug.DrawRay(bodyCollider.bounds.center, -slopeHit.normal, Color.blue, 0.03f, false);
 		//Debug.Log(rb.velocity.magnitude);
+		//Debug.Log(moveVector);
 	}
 
 	private void HandleMovement()
@@ -107,20 +111,17 @@ public class PlayerController : MonoBehaviour
 
 		if (IsGrounded())
 		{
-			if (moveVector == Vector3.zero)
-            {
-				isStanding = true;
-            }
-            else
-            {
-				isStanding = false;
-            }
 			playerRb.AddForce(slopeMoveVector * moveSpeed, ForceMode.Acceleration);
-			//if (OnSlope() && slopeHit.normal.y < 0.6f)
-			//{
-			//	rb.AddForce(Vector3.down * 10000);
-			//}
-		}
+			Debug.Log(playerRb.velocity.magnitude);
+            if (playerRb.velocity.magnitude < 1f)
+            {
+				playerRb.AddForce(-playerRb.velocity ,ForceMode.Acceleration);
+            }
+            //if (OnSlope() && slopeHit.normal.y < 0.6f)
+            //{
+            //	rb.AddForce(-transform.up * 10000);
+            //}
+        }
 		else
 		{
 			playerRb.AddForce(moveVector * moveSpeed / 7f, ForceMode.Acceleration);
@@ -169,11 +170,11 @@ public class PlayerController : MonoBehaviour
 		Vector3 rayHitPoint;
 		Vector3 targetPos;
 
-		Physics.Raycast((bodyCollider.bounds.center - new Vector3(0f, bodyCollider.bounds.extents.y - 0.5f, 0f)), Vector3.down, out groundHit, 1.2f, groundLayerMask, QueryTriggerInteraction.Ignore);
-
+		Physics.Raycast((bodyCollider.bounds.center - new Vector3(0f, bodyCollider.bounds.extents.y - 0.5f, 0f)), -transform.up, out groundHit, 1.2f, groundLayerMask, QueryTriggerInteraction.Ignore);
+		Debug.DrawRay((bodyCollider.bounds.center - new Vector3(0f, bodyCollider.bounds.extents.y - 0.5f, 0f)), -transform.up, Color.red, 0.03f);
 		if (groundHit.normal == Vector3.zero)
 		{
-			rayHitPoint = playerRb.position - new Vector3(0f, 1f, 0f);
+			rayHitPoint = playerRb.position - transform.up;
 		}
 		else
 		{
@@ -183,18 +184,17 @@ public class PlayerController : MonoBehaviour
 		targetPos = playerRb.position;
 		if (IsGrounded())
 		{
-			targetPos.y = rayHitPoint.y + 1f;
+			targetPos = rayHitPoint + transform.up;
 		}
 		else
 		{
-			targetPos.y = rayHitPoint.y;
+			targetPos = rayHitPoint;
 		}
 
 
 		if (IsGrounded())
 		{
-
-			playerRb.position = Vector3.Lerp(playerRb.position, targetPos, 0.6f);
+			playerRb.position =  Vector3.Lerp(playerRb.position, targetPos, 0.6f);
 		}
 	}
 
@@ -203,7 +203,7 @@ public class PlayerController : MonoBehaviour
 		if (jumpBufferCounter > 0f && IsGrounded())
 		{
 			playerRb.velocity = new Vector3(playerRb.velocity.x, 0f, playerRb.velocity.z);
-			playerRb.AddForce(Vector3.up * jumpStrenght, ForceMode.Impulse);
+			playerRb.AddForce(transform.up * jumpStrenght, ForceMode.Impulse);
 		}
 	}
 
@@ -233,10 +233,10 @@ public class PlayerController : MonoBehaviour
 
 	private void AirFall()
 	{
-		if (playerRb.velocity.y < jumpFalloff && IsGrounded() == false)
-			playerRb.AddForce(Vector3.down * jumpStrenght / 17, ForceMode.Impulse);
+		if (!IsGrounded() && playerRb.velocity.y < jumpFalloff && playerRb.useGravity)
+			playerRb.AddForce(-transform.up * jumpStrenght / 17, ForceMode.Impulse);
 	}
-
+	
 	private bool IsGrounded()
 	{
 		isGrounded = Physics.CheckSphere(checkSphere.position, 0.40f, groundLayerMask, QueryTriggerInteraction.Ignore);
@@ -245,7 +245,7 @@ public class PlayerController : MonoBehaviour
 
 	private bool OnSlope()
 	{
-		Physics.Raycast(bodyCollider.bounds.center, Vector3.down, out slopeHit, bodyCollider.bounds.extents.y + 2f);
+		Physics.Raycast(bodyCollider.bounds.center, -transform.up, out slopeHit, bodyCollider.bounds.extents.y + 2f);
 		if (slopeHit.normal != Vector3.up && slopeHit.normal != Vector3.zero)
 		{
 			return true;
@@ -315,7 +315,7 @@ public class PlayerController : MonoBehaviour
 	private void OnRigidbody()
     {
 		RaycastHit hit;
-		Physics.Raycast(checkSphere.position, Vector3.down, out hit, 1f, rigidbodyMask, QueryTriggerInteraction.Ignore);
+		Physics.Raycast(checkSphere.position, -transform.up, out hit, 1f, rigidbodyMask, QueryTriggerInteraction.Ignore);
 		onRb = pulledRb == hit.rigidbody && pulledRb != null ? true : false; 
 		//if (pulledRb == hit.rigidbody)
   //      {

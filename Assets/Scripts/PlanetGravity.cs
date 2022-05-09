@@ -6,26 +6,31 @@ public class PlanetGravity : MonoBehaviour
 {
 
     private HashSet<Rigidbody> affectedRigidbodies = new HashSet<Rigidbody>();
-    private SphereCollider triggerCollider;
     private Rigidbody planetRb;
+    [HideInInspector] public float playerGravStrenght;
+    [SerializeField] private PlayerGravityFacing playerGravFacing;
 
     void Start()
     {
-        triggerCollider = GetComponent<SphereCollider>();
         planetRb = GetComponent<Rigidbody>();
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
         foreach (Rigidbody affectedRigidbody in affectedRigidbodies)
         {
             Vector3 gravDirection = (transform.position - affectedRigidbody.position).normalized;
-            float gravStrenght = (planetRb.mass * affectedRigidbody.mass) / (Vector3.Distance(transform.position, affectedRigidbody.position));
-            affectedRigidbody.AddForce(gravDirection*gravStrenght, ForceMode.Acceleration);
-            if (affectedRigidbody.GetComponent<PlayerController>() != null)
+            float gravStrenght = planetRb.mass / Vector3.Distance(transform.position, affectedRigidbody.position);
+            //float gravStrenght = (planetRb.mass * affectedRigidbody.mass) / Vector3.Distance(transform.position, affectedRigidbody.position);
+
+            if (affectedRigidbody.useGravity)
             {
-                Debug.Log(gravStrenght);
+                affectedRigidbody.AddForce(gravDirection * gravStrenght, ForceMode.Acceleration);
+            }
+            
+            if (affectedRigidbody.GetComponent<PlayerController>())
+            {
+                playerGravStrenght = gravStrenght;
             }
         }
     }
@@ -36,6 +41,10 @@ public class PlanetGravity : MonoBehaviour
         {
             affectedRigidbodies.Add(other.attachedRigidbody);
         }
+        if (other.GetComponent<PlayerController>())
+        {
+            playerGravFacing.planetGrav.Add(this);
+        }
     }
 
     private void OnTriggerExit(Collider other)
@@ -43,6 +52,10 @@ public class PlanetGravity : MonoBehaviour
         if (other.attachedRigidbody != null)
         {
             affectedRigidbodies.Remove(other.attachedRigidbody);
+        }
+        if (other.GetComponent<PlayerController>())
+        {
+            playerGravFacing.planetGrav.Remove(this);
         }
     }
 
