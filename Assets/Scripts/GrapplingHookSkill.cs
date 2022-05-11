@@ -1,4 +1,4 @@
-using System.Collections;
+п»їusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -46,7 +46,7 @@ public class GrapplingHookSkill : MonoBehaviour
                 if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Rigidbody"))
                 {
                     hitRb = hit.rigidbody;
-                    hitPoint = hit.rigidbody.transform.InverseTransformPoint(hit.point); // Переводит точку попадания из мировых координат в локальные координаты rigidbody
+                    hitPoint = hit.rigidbody.transform.InverseTransformPoint(hit.point); // РџРµСЂРµРІРѕРґРёС‚ С‚РѕС‡РєСѓ РїРѕРїР°РґР°РЅРёСЏ РёР· РјРёСЂРѕРІС‹С… РєРѕРѕСЂРґРёРЅР°С‚ РІ Р»РѕРєР°Р»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ rigidbody
                 }
                 else
                 {
@@ -58,16 +58,16 @@ public class GrapplingHookSkill : MonoBehaviour
         {
             if (hitRb != null)
             {
-                hitRb.AddForceAtPosition((pCont.camera.ViewportToWorldPoint(new Vector3(0.25f, 0.4f, 1f)) - hitRb.transform.TransformPoint(hitPoint)) * 50f, hitRb.transform.TransformPoint(hitPoint), ForceMode.Force);
+                hitRb.AddForceAtPosition((pCont.camera.ViewportToWorldPoint(new Vector3(0.8f, 0.25f, 1f)) - hitRb.transform.TransformPoint(hitPoint)) * 50f, hitRb.transform.TransformPoint(hitPoint), ForceMode.Force);
                 pCont.playerRb.AddForce((hitRb.transform.TransformPoint(hitPoint) - transform.position) * 50f, ForceMode.Force);
-                line.SetPosition(0, pCont.camera.ViewportToWorldPoint(new Vector3(0.25f, 0.4f, 0.5f)));
+                line.SetPosition(0, pCont.camera.ViewportToWorldPoint(new Vector3(0.8f, 0.25f, 0.5f)));
                 line.SetPosition(1, hitRb.transform.TransformPoint(hitPoint));
             }
             else
             {
                 pCont.airFallingEnabled = false;
                 pCont.playerRb.AddForce((hitPoint - transform.position) * 25f, ForceMode.Force);
-                line.SetPosition(0, pCont.camera.ViewportToWorldPoint(new Vector3(0.25f, 0.4f, 0.5f)));
+                line.SetPosition(0, pCont.camera.ViewportToWorldPoint(new Vector3(0.8f, 0.25f, 0.5f)));
                 line.SetPosition(1, hitPoint);
             }
             line.enabled = true;

@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
@@ -15,7 +15,7 @@ public class PlayerController : MonoBehaviour
 	private float savedCameraHeight;
 	
 
-	//Переменные, значение которым присваивается только 1 раз
+	//РџРµСЂРµРјРµРЅРЅС‹Рµ, Р·РЅР°С‡РµРЅРёРµ РєРѕС‚РѕСЂС‹Рј РїСЂРёСЃРІР°РёРІР°РµС‚СЃСЏ С‚РѕР»СЊРєРѕ 1 СЂР°Р·
 	private float xRotation = 0f;
 	private float jumpBufferTime = 0.1f;
 	private float dist = 2.5f;
@@ -54,7 +54,7 @@ public class PlayerController : MonoBehaviour
 	[SerializeField] private float crouchHeight;
 
 
-    void Start()
+	void Start()
 	{
 		Cursor.lockState = CursorLockMode.Locked;
 		savedColliderHeight = bodyCollider.height;
@@ -87,7 +87,7 @@ public class PlayerController : MonoBehaviour
 	}
 
 	private void MyInputs()
-    {
+	{
 		if (Input.GetKeyUp(pullKey))
 		{
 			ReleaseRb();
@@ -108,29 +108,29 @@ public class PlayerController : MonoBehaviour
 		float moveZ = Input.GetAxisRaw("Vertical");
 
 		moveVector = transform.right * moveX + transform.forward * moveZ;
-        if (moveVector.magnitude > 1)
-            moveVector /= moveVector.magnitude;
+		if (moveVector.magnitude > 1)
+			moveVector /= moveVector.magnitude;
 
 		
-        Vector3 slopeMoveVector = Vector3.ProjectOnPlane(moveVector, slopeHit.normal); //Проецирует вектор движения параллельно наклонной поверхности
-        //if (slopeMoveVector.magnitude != 0 && slopeMoveVector.magnitude < 1)
-        //    slopeMoveVector /= slopeMoveVector.magnitude;
+		Vector3 slopeMoveVector = Vector3.ProjectOnPlane(moveVector, slopeHit.normal); //РџСЂРѕРµС†РёСЂСѓРµС‚ РІРµРєС‚РѕСЂ РґРІРёР¶РµРЅРёСЏ РїР°СЂР°Р»Р»РµР»СЊРЅРѕ РЅР°РєР»РѕРЅРЅРѕР№ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё
+		//if (slopeMoveVector.magnitude != 0 && slopeMoveVector.magnitude < 1)
+		//    slopeMoveVector /= slopeMoveVector.magnitude;
 
-        if (playerRb.velocity.magnitude < 0.3f)
+		if (playerRb.velocity.magnitude < 0.3f)
 		{
 			playerRb.velocity = Vector3.zero;
 		}
 
-		//Движение на земле и в воздухе
+		//Р”РІРёР¶РµРЅРёРµ РЅР° Р·РµРјР»Рµ Рё РІ РІРѕР·РґСѓС…Рµ
 		if (IsGrounded())
 		{
 			playerRb.AddForce(slopeMoveVector * moveSpeed, ForceMode.Acceleration);
 			
-            //if (OnSlope() && slopeHit.normal.y < 0.6f)
-            //{
-            //	rb.AddForce(-transform.up * 10000);
-            //}
-        }
+			//if (OnSlope() && slopeHit.normal.y < 0.6f)
+			//{
+			//	rb.AddForce(-transform.up * 10000);
+			//}
+		}
 		else
 		{
 			playerRb.AddForce(moveVector * moveSpeed / 7f, ForceMode.Acceleration);
@@ -175,42 +175,42 @@ public class PlayerController : MonoBehaviour
 	}
 
 	private void HandleStairs()
-    {
-        int maxSteps = 70;
-        float stepValue = 0.01f;
-        float currentStepValue = 0f;
-        RaycastHit hit;
+	{
+		int maxSteps = 70;
+		float stepValue = 0.01f;
+		float currentStepValue = 0f;
+		RaycastHit hit;
 
-        if (moveVector != Vector3.zero)
-        {
-            for (int stepsCount = 0; stepsCount < maxSteps; stepsCount++)
-            {
-                Physics.Raycast(stairsCheck.position + new Vector3(0f, currentStepValue, 0f), moveVector, out hit, 0.8f, groundLayerMask, QueryTriggerInteraction.Ignore);
+		if (moveVector != Vector3.zero)
+		{
+			for (int stepsCount = 0; stepsCount < maxSteps; stepsCount++)
+			{
+				Physics.Raycast(stairsCheck.position + new Vector3(0f, currentStepValue, 0f), moveVector, out hit, 0.8f, groundLayerMask, QueryTriggerInteraction.Ignore);
 				if (hit.normal == Vector3.zero)
-                {
+				{
 					playerRb.position += transform.up * currentStepValue;
 					break;
 				}
 				currentStepValue += stepValue;
 			}
-        }
-    }
+		}
+	}
 
 	private void HandleCrouch()
-    {
-        if (Input.GetKey(crouchKey))
-        {
+	{
+		if (Input.GetKey(crouchKey))
+		{
 			bodyCollider.height = Mathf.Lerp(bodyCollider.height, savedColliderHeight * crouchHeight, 0.5f);
 			bodyCollider.center = new Vector3(0f, Mathf.Lerp(bodyCollider.center.y, -(savedColliderHeight - bodyCollider.height) / 2, 0.5f) , 0f);
 			camera.transform.localPosition = new Vector3(0f, Mathf.Lerp(camera.transform.localPosition.y, savedCameraHeight - (savedColliderHeight - bodyCollider.height), 0.5f) , 0f);
-        }
-        else
-        {
+		}
+		else
+		{
 			bodyCollider.height = Mathf.Lerp(bodyCollider.height, savedColliderHeight, 0.5f);
 			bodyCollider.center = Vector3.Lerp(bodyCollider.center, Vector3.zero, 0.5f);
 			camera.transform.localPosition = new Vector3(0f, Mathf.Lerp(camera.transform.localPosition.y, savedCameraHeight, 0.5f), 0f);
 		}
-    }
+	}
 
 	private void StairsMovement()
 	{
@@ -284,9 +284,9 @@ public class PlayerController : MonoBehaviour
 
 	private void AirFall()
 	{
-        //Прижимает игрока после прохождения апогея прыжка
-        if (airFallingEnabled)
-        {
+		//РџСЂРёР¶РёРјР°РµС‚ РёРіСЂРѕРєР° РїРѕСЃР»Рµ РїСЂРѕС…РѕР¶РґРµРЅРёСЏ Р°РїРѕРіРµСЏ РїСЂС‹Р¶РєР°
+		if (airFallingEnabled)
+		{
 			if (!IsGrounded() && playerRb.velocity.y < jumpFalloff && playerRb.useGravity)
 				playerRb.AddForce(-transform.up * jumpStrenght / 17, ForceMode.Impulse);
 		}
@@ -313,45 +313,45 @@ public class PlayerController : MonoBehaviour
 	}
 
 	private void PullRb()
-    {
+	{
 		if (Input.GetKey(pullKey))
-        {
-			// Если игрок стоит на предмете который берет, то отпускает его
-            if (onRb)
-            {
-                ReleaseRb();
-            }
-            else
-            {
-                RaycastHit dragHit;
+		{
+			// Р•СЃР»Рё РёРіСЂРѕРє СЃС‚РѕРёС‚ РЅР° РїСЂРµРґРјРµС‚Рµ РєРѕС‚РѕСЂС‹Р№ Р±РµСЂРµС‚, С‚Рѕ РѕС‚РїСѓСЃРєР°РµС‚ РµРіРѕ
+			if (onRb)
+			{
+				ReleaseRb();
+			}
+			else
+			{
+				RaycastHit dragHit;
 				if (pulledRb != null)
 				{
 					if (tStopAbility.timeStopped)
 					{
 						pulledRb.constraints = RigidbodyConstraints.None;
 					}
-					pulledRb.AddForce(((camera.ScreenToWorldPoint(Vector3.zero) + camera.transform.forward * dist) - pulledRb.position) * 10, ForceMode.VelocityChange); //Держит предмет на заданном от игрока расстоянии
+					pulledRb.AddForce(((camera.ScreenToWorldPoint(Vector3.zero) + camera.transform.forward * dist) - pulledRb.position) * 10, ForceMode.VelocityChange); //Р”РµСЂР¶РёС‚ РїСЂРµРґРјРµС‚ РЅР° Р·Р°РґР°РЅРЅРѕРј РѕС‚ РёРіСЂРѕРєР° СЂР°СЃСЃС‚РѕСЏРЅРёРё
 				}
 				else
 				{
 					if (Physics.Raycast(camera.ScreenToWorldPoint(Vector3.zero), camera.transform.forward, out dragHit, 2.5f, rigidbodyMask))
-                    {
-						dist = Vector3.Distance(camera.ScreenToWorldPoint(Vector3.zero), dragHit.rigidbody.position); //Запоминает расстояние от игрока до предмета
+					{
+						dist = Vector3.Distance(camera.ScreenToWorldPoint(Vector3.zero), dragHit.rigidbody.position); //Р—Р°РїРѕРјРёРЅР°РµС‚ СЂР°СЃСЃС‚РѕСЏРЅРёРµ РѕС‚ РёРіСЂРѕРєР° РґРѕ РїСЂРµРґРјРµС‚Р°
 						pulledRb = dragHit.rigidbody;
 						pulledRb.angularDrag = 20f;
 						pulledRb.drag = 20f;
 						pulledRb.useGravity = false;
 					}
-                }
-            }
+				}
+			}
 			
 		}
-    }
+	}
 
 	private void ReleaseRb()
-    {
+	{
 		if (pulledRb != null)
-        {
+		{
 			if (tStopAbility.timeStopped)
 			{
 				pulledRb.constraints = RigidbodyConstraints.FreezeAll;
@@ -366,20 +366,20 @@ public class PlayerController : MonoBehaviour
 	}
 
 	private void OnRigidbody()
-    {
+	{
 		RaycastHit hit;
 		Physics.Raycast(groundCheck.position, -transform.up, out hit, 1f, rigidbodyMask, QueryTriggerInteraction.Ignore);
-		onRb = pulledRb == hit.rigidbody && pulledRb != null ? true : false; // true если игрок пытается держать предмет на котором стоит
+		onRb = pulledRb == hit.rigidbody && pulledRb != null ? true : false; // true РµСЃР»Рё РёРіСЂРѕРє РїС‹С‚Р°РµС‚СЃСЏ РґРµСЂР¶Р°С‚СЊ РїСЂРµРґРјРµС‚ РЅР° РєРѕС‚РѕСЂРѕРј СЃС‚РѕРёС‚
 		if (hit.rigidbody != null)
-        {
-			if (playerRb.velocity.magnitude < hit.rigidbody.velocity.magnitude) // Добавляет нехватающую игроку скорость до предмета снизу
-            {
+		{
+			if (playerRb.velocity.magnitude < hit.rigidbody.velocity.magnitude) // Р”РѕР±Р°РІР»СЏРµС‚ РЅРµС…РІР°С‚Р°СЋС‰СѓСЋ РёРіСЂРѕРєСѓ СЃРєРѕСЂРѕСЃС‚СЊ РґРѕ РїСЂРµРґРјРµС‚Р° СЃРЅРёР·Сѓ
+			{
 				playerRb.velocity = moveVector + hit.rigidbody.velocity*1.4f;
 				if (Vector3.Angle(hit.rigidbody.velocity, moveVector) > 160f || Vector3.Angle(hit.rigidbody.velocity, moveVector) < 20f)
 				{
 					playerRb.AddForce(moveVector*5f, ForceMode.VelocityChange);
-                }
+				}
 			}
-        }
-    }
+		}
+	}
 }

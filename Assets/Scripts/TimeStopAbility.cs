@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,7 +27,7 @@ public class TimeStopAbility : MonoBehaviour
             //anim.Play("Human Arms Cast", 0, 0.0f);
             TimeStop();
         }
-        if (Input.GetKeyDown(KeyCode.Alpha2) && timeStopped)
+        if (Input.GetKeyDown(KeyCode.E) && timeStopped)
         {
             StartCoroutine(CoroutineTimeResume());
         }

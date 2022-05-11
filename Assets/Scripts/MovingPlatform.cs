@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 public class MovingPlatform : MonoBehaviour
 {
@@ -13,9 +13,9 @@ public class MovingPlatform : MonoBehaviour
     [SerializeField] private Transform endPoint;
     [SerializeField] private TimeStopAbility timeStopAbility;
 
-    //можно попробовать что бы сама платформа двигала rigidbody, а не парентила их
-    //че за хуйня...
-    //видимо код можно к хуям удалить
+    //РјРѕР¶РЅРѕ РїРѕРїСЂРѕР±РѕРІР°С‚СЊ С‡С‚Рѕ Р±С‹ СЃР°РјР° РїР»Р°С‚С„РѕСЂРјР° РґРІРёРіР°Р»Р° rigidbody, Р° РЅРµ РїР°СЂРµРЅС‚РёР»Р° РёС…
+    //С‡Рµ Р·Р° С…СѓР№РЅСЏ...
+    //РІРёРґРёРјРѕ РєРѕРґ РјРѕР¶РЅРѕ Рє С…СѓСЏРј СѓРґР°Р»РёС‚СЊ
 
     void Start()
     {
