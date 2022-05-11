@@ -3,7 +3,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
 
-	private Rigidbody playerRb;
+	
 	private float jumpBufferCounter;
 	private float moveSpeed;
 	private bool isSprinting;
@@ -11,18 +11,23 @@ public class PlayerController : MonoBehaviour
 	private Vector3 moveVector;
 	private Transform stairsCheck;
 	private Transform groundCheck;
+	private float savedColliderHeight;
+	private float savedCameraHeight;
+	
 
 	//Переменные, значение которым присваивается только 1 раз
 	private float xRotation = 0f;
 	private float jumpBufferTime = 0.1f;
 	private float dist = 2.5f;
 
+	[HideInInspector] public Rigidbody playerRb;
 	[HideInInspector] public bool onRb;
 	[HideInInspector] public Rigidbody pulledRb = null;
 
 	[Header("Keys")]
 	[SerializeField] private KeyCode jumpKey = KeyCode.Space;
-	[SerializeField] private KeyCode sprintKey = KeyCode.LeftControl;
+	[SerializeField] private KeyCode sprintKey = KeyCode.LeftShift;
+	[SerializeField] private KeyCode crouchKey = KeyCode.LeftControl;
 	[SerializeField] private KeyCode pullKey = KeyCode.E;
 	[SerializeField] public KeyCode fireKey = KeyCode.Mouse0;
 	[SerializeField] public KeyCode abilityKey = KeyCode.Alpha1;
@@ -30,7 +35,7 @@ public class PlayerController : MonoBehaviour
 
 	[Header("Assigments")]
 	[SerializeField] public Camera camera;
-	[SerializeField] private Collider bodyCollider;
+	[SerializeField] private CapsuleCollider bodyCollider;
 	[SerializeField] private LayerMask groundLayerMask;
 	[SerializeField] private LayerMask rigidbodyMask;
 	[SerializeField] private TimeStopAbility tStopAbility;
@@ -38,16 +43,22 @@ public class PlayerController : MonoBehaviour
 
 	[Header("Variables")]
 	[SerializeField] public bool isGrounded;
+	[SerializeField] public bool airFallingEnabled;
+	[Range(1, 2)]
 	[SerializeField] private float lookSens;
 	[SerializeField] private float walkSpeed;
 	[SerializeField] private float sprintSpeed;
 	[SerializeField] private float jumpFalloff;
 	[SerializeField] private float jumpStrenght;
+	[Range(0.5f, 0.9f)]
+	[SerializeField] private float crouchHeight;
 
 
     void Start()
 	{
 		Cursor.lockState = CursorLockMode.Locked;
+		savedColliderHeight = bodyCollider.height;
+		savedCameraHeight = camera.transform.localPosition.y;
 		stairsCheck = transform.Find("StairsCheck");
 		groundCheck = transform.Find("GroundCheck");
 		playerRb = GetComponent<Rigidbody>();
@@ -65,6 +76,7 @@ public class PlayerController : MonoBehaviour
 		DebugCheck();
 		PullRb();
 		OnRigidbody();
+		HandleCrouch();
 	}
 
 	private void Update()
@@ -184,6 +196,21 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+	private void HandleCrouch()
+    {
+        if (Input.GetKey(crouchKey))
+        {
+			bodyCollider.height = Mathf.Lerp(bodyCollider.height, savedColliderHeight * crouchHeight, 0.5f);
+			bodyCollider.center = new Vector3(0f, Mathf.Lerp(bodyCollider.center.y, -(savedColliderHeight - bodyCollider.height) / 2, 0.5f) , 0f);
+			camera.transform.localPosition = new Vector3(0f, Mathf.Lerp(camera.transform.localPosition.y, savedCameraHeight - (savedColliderHeight - bodyCollider.height), 0.5f) , 0f);
+        }
+        else
+        {
+			bodyCollider.height = Mathf.Lerp(bodyCollider.height, savedColliderHeight, 0.5f);
+			bodyCollider.center = Vector3.Lerp(bodyCollider.center, Vector3.zero, 0.5f);
+			camera.transform.localPosition = new Vector3(0f, Mathf.Lerp(camera.transform.localPosition.y, savedCameraHeight, 0.5f), 0f);
+		}
+    }
 
 	private void StairsMovement()
 	{
@@ -257,9 +284,12 @@ public class PlayerController : MonoBehaviour
 
 	private void AirFall()
 	{
-		//Прижимает игрока после прохождения апогея прыжка
-		if (!IsGrounded() && playerRb.velocity.y < jumpFalloff && playerRb.useGravity)
-			playerRb.AddForce(-transform.up * jumpStrenght / 17, ForceMode.Impulse);
+        //Прижимает игрока после прохождения апогея прыжка
+        if (airFallingEnabled)
+        {
+			if (!IsGrounded() && playerRb.velocity.y < jumpFalloff && playerRb.useGravity)
+				playerRb.AddForce(-transform.up * jumpStrenght / 17, ForceMode.Impulse);
+		}
 	}
 	
 	private bool IsGrounded()
