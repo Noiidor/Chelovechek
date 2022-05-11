@@ -3,19 +3,21 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
 
-
 	private Rigidbody playerRb;
-	private float xRotation = 0f;
-	private float jumpBufferTime = 0.1f;
 	private float jumpBufferCounter;
 	private float moveSpeed;
 	private bool isSprinting;
 	private RaycastHit slopeHit;
-	private Vector3 slopeMoveVector;
 	private Vector3 moveVector;
-	public bool onRb = false;
+	private Transform stairsCheck;
+	private Transform groundCheck;
+
+	//Переменные, значение которым присваивается только 1 раз
+	private float xRotation = 0f;
+	private float jumpBufferTime = 0.1f;
 	private float dist = 2.5f;
-	public bool isStanding;
+
+	[HideInInspector] public bool onRb;
 	[HideInInspector] public Rigidbody pulledRb = null;
 
 	[Header("Keys")]
@@ -28,10 +30,8 @@ public class PlayerController : MonoBehaviour
 
 	[Header("Assigments")]
 	[SerializeField] public Camera camera;
-	[SerializeField] private Transform checkSphere;
 	[SerializeField] private Collider bodyCollider;
 	[SerializeField] private LayerMask groundLayerMask;
-	[SerializeField] private LayerMask dragLayerMask;
 	[SerializeField] private LayerMask rigidbodyMask;
 	[SerializeField] private TimeStopAbility tStopAbility;
 	[Space]
@@ -45,27 +45,24 @@ public class PlayerController : MonoBehaviour
 	[SerializeField] private float jumpStrenght;
 
 
-    private void Awake()
-    {
-		Cursor.lockState = CursorLockMode.Locked;
-	}
-
     void Start()
 	{
+		Cursor.lockState = CursorLockMode.Locked;
+		stairsCheck = transform.Find("StairsCheck");
+		groundCheck = transform.Find("GroundCheck");
 		playerRb = GetComponent<Rigidbody>();
-		
 	}
 
 	void FixedUpdate()
 	{
+		HandleStairs();
 		SprintMovement();
 		HandleMovement();
-		//AirFall();
+		AirFall();
 		Jump();
 		OnSlope();
 		DragControl();
 		DebugCheck();
-		StairsMovement();
 		PullRb();
 		OnRigidbody();
 	}
@@ -90,8 +87,7 @@ public class PlayerController : MonoBehaviour
 		//Debug.DrawRay(bodyCollider.bounds.center, playerRb.velocity, Color.green, 0.03f, false);
 		//Debug.DrawRay(bodyCollider.bounds.center, moveVector, Color.red, 0.03f, false);
 		//Debug.DrawRay(bodyCollider.bounds.center, -slopeHit.normal, Color.blue, 0.03f, false);
-		//Debug.Log(rb.velocity.magnitude);
-		//Debug.Log(moveVector);
+		//Debug.Log(playerRb.velocity.magnitude);
 	}
 
 	private void HandleMovement()
@@ -100,23 +96,24 @@ public class PlayerController : MonoBehaviour
 		float moveZ = Input.GetAxisRaw("Vertical");
 
 		moveVector = transform.right * moveX + transform.forward * moveZ;
-		//if (moveVector.magnitude > 1)
-		//	moveVector /= moveVector.magnitude;
+        if (moveVector.magnitude > 1)
+            moveVector /= moveVector.magnitude;
 
-		slopeMoveVector = Vector3.ProjectOnPlane(moveVector, slopeHit.normal);
-		//if (slopeMoveVector.magnitude != 0 && slopeMoveVector.magnitude < 1)
-		//	slopeMoveVector /= slopeMoveVector.magnitude;
+		
+        Vector3 slopeMoveVector = Vector3.ProjectOnPlane(moveVector, slopeHit.normal); //Проецирует вектор движения параллельно наклонной поверхности
+        //if (slopeMoveVector.magnitude != 0 && slopeMoveVector.magnitude < 1)
+        //    slopeMoveVector /= slopeMoveVector.magnitude;
 
+        if (playerRb.velocity.magnitude < 0.3f)
+		{
+			playerRb.velocity = Vector3.zero;
+		}
 
-
+		//Движение на земле и в воздухе
 		if (IsGrounded())
 		{
 			playerRb.AddForce(slopeMoveVector * moveSpeed, ForceMode.Acceleration);
-			Debug.Log(playerRb.velocity.magnitude);
-            if (playerRb.velocity.magnitude < 1f)
-            {
-				playerRb.AddForce(-playerRb.velocity ,ForceMode.Acceleration);
-            }
+			
             //if (OnSlope() && slopeHit.normal.y < 0.6f)
             //{
             //	rb.AddForce(-transform.up * 10000);
@@ -132,6 +129,7 @@ public class PlayerController : MonoBehaviour
 	{
 		float lookX = Input.GetAxis("Mouse X") * lookSens;
 		float lookY = Input.GetAxis("Mouse Y") * lookSens;
+		
 
 		xRotation -= lookY;
 		xRotation = Mathf.Clamp(xRotation, -90f, 90f);
@@ -164,14 +162,37 @@ public class PlayerController : MonoBehaviour
 		}
 	}
 
+	private void HandleStairs()
+    {
+        int maxSteps = 70;
+        float stepValue = 0.01f;
+        float currentStepValue = 0f;
+        RaycastHit hit;
+
+        if (moveVector != Vector3.zero)
+        {
+            for (int stepsCount = 0; stepsCount < maxSteps; stepsCount++)
+            {
+                Physics.Raycast(stairsCheck.position + new Vector3(0f, currentStepValue, 0f), moveVector, out hit, 0.8f, groundLayerMask, QueryTriggerInteraction.Ignore);
+				if (hit.normal == Vector3.zero)
+                {
+					playerRb.position += transform.up * currentStepValue;
+					break;
+				}
+				currentStepValue += stepValue;
+			}
+        }
+    }
+
+
 	private void StairsMovement()
 	{
 		RaycastHit groundHit;
 		Vector3 rayHitPoint;
 		Vector3 targetPos;
 
-		Physics.Raycast((bodyCollider.bounds.center - new Vector3(0f, bodyCollider.bounds.extents.y - 0.5f, 0f)), -transform.up, out groundHit, 1.2f, groundLayerMask, QueryTriggerInteraction.Ignore);
-		Debug.DrawRay((bodyCollider.bounds.center - new Vector3(0f, bodyCollider.bounds.extents.y - 0.5f, 0f)), -transform.up, Color.red, 0.03f);
+		Physics.Raycast((bodyCollider.bounds.center - new Vector3(0f, bodyCollider.bounds.extents.y - 0.5f, 0f)), -transform.up, out groundHit, 1.5f, groundLayerMask, QueryTriggerInteraction.Ignore);
+		
 		if (groundHit.normal == Vector3.zero)
 		{
 			rayHitPoint = playerRb.position - transform.up;
@@ -194,12 +215,14 @@ public class PlayerController : MonoBehaviour
 
 		if (IsGrounded())
 		{
-			playerRb.position =  Vector3.Lerp(playerRb.position, targetPos, 0.6f);
+			//playerRb.position =  Vector3.Lerp(playerRb.position, targetPos, 0.6f);
+			playerRb.position = targetPos;
 		}
 	}
 
 	private void Jump()
 	{
+		//Coyote time
 		if (jumpBufferCounter > 0f && IsGrounded())
 		{
 			playerRb.velocity = new Vector3(playerRb.velocity.x, 0f, playerRb.velocity.z);
@@ -224,6 +247,7 @@ public class PlayerController : MonoBehaviour
 		if (IsGrounded())
 		{
 			playerRb.drag = 10f;
+			
 		}
 		else
 		{
@@ -233,13 +257,14 @@ public class PlayerController : MonoBehaviour
 
 	private void AirFall()
 	{
+		//Прижимает игрока после прохождения апогея прыжка
 		if (!IsGrounded() && playerRb.velocity.y < jumpFalloff && playerRb.useGravity)
 			playerRb.AddForce(-transform.up * jumpStrenght / 17, ForceMode.Impulse);
 	}
 	
 	private bool IsGrounded()
 	{
-		isGrounded = Physics.CheckSphere(checkSphere.position, 0.40f, groundLayerMask, QueryTriggerInteraction.Ignore);
+		isGrounded = Physics.CheckSphere(groundCheck.position, 0.40f, groundLayerMask, QueryTriggerInteraction.Ignore);
 		return isGrounded;
 	}
 
@@ -261,6 +286,7 @@ public class PlayerController : MonoBehaviour
     {
 		if (Input.GetKey(pullKey))
         {
+			// Если игрок стоит на предмете который берет, то отпускает его
             if (onRb)
             {
                 ReleaseRb();
@@ -274,21 +300,18 @@ public class PlayerController : MonoBehaviour
 					{
 						pulledRb.constraints = RigidbodyConstraints.None;
 					}
-					pulledRb.AddForce(((camera.ScreenToWorldPoint(Vector3.zero) + camera.transform.forward * dist) - pulledRb.position) * 10, ForceMode.VelocityChange);
+					pulledRb.AddForce(((camera.ScreenToWorldPoint(Vector3.zero) + camera.transform.forward * dist) - pulledRb.position) * 10, ForceMode.VelocityChange); //Держит предмет на заданном от игрока расстоянии
 				}
 				else
 				{
-					try
-					{
-						Physics.Raycast(camera.ScreenToWorldPoint(Vector3.zero), camera.transform.forward, out dragHit, 2.5f, dragLayerMask);
-						dist = Vector3.Distance(camera.ScreenToWorldPoint(Vector3.zero), dragHit.rigidbody.position);
+					if (Physics.Raycast(camera.ScreenToWorldPoint(Vector3.zero), camera.transform.forward, out dragHit, 2.5f, rigidbodyMask))
+                    {
+						dist = Vector3.Distance(camera.ScreenToWorldPoint(Vector3.zero), dragHit.rigidbody.position); //Запоминает расстояние от игрока до предмета
 						pulledRb = dragHit.rigidbody;
 						pulledRb.angularDrag = 20f;
 						pulledRb.drag = 20f;
 						pulledRb.useGravity = false;
 					}
-					catch (System.NullReferenceException)
-					{ }
                 }
             }
 			
@@ -315,39 +338,18 @@ public class PlayerController : MonoBehaviour
 	private void OnRigidbody()
     {
 		RaycastHit hit;
-		Physics.Raycast(checkSphere.position, -transform.up, out hit, 1f, rigidbodyMask, QueryTriggerInteraction.Ignore);
-		onRb = pulledRb == hit.rigidbody && pulledRb != null ? true : false; 
-		//if (pulledRb == hit.rigidbody)
-  //      {
-		//	onRb = true;
-  //      }
-  //      else
-  //      {
-		//	onRb = false;
-		//}
+		Physics.Raycast(groundCheck.position, -transform.up, out hit, 1f, rigidbodyMask, QueryTriggerInteraction.Ignore);
+		onRb = pulledRb == hit.rigidbody && pulledRb != null ? true : false; // true если игрок пытается держать предмет на котором стоит
 		if (hit.rigidbody != null)
         {
-			if (playerRb.velocity.magnitude < hit.rigidbody.velocity.magnitude)
+			if (playerRb.velocity.magnitude < hit.rigidbody.velocity.magnitude) // Добавляет нехватающую игроку скорость до предмета снизу
             {
-
-				//if (Vector3.Angle(hit.rigidbody.velocity, slopeMoveVector) > 165 || Vector3.Angle(hit.rigidbody.velocity, slopeMoveVector) < 15)
-				//            {
-				//	Debug.Log(Vector3.Angle(hit.rigidbody.velocity, slopeMoveVector));
-				//	slopeMoveVector *= 3f;
-				//            }
-
-				//playerRb.AddForce((hit.rigidbody.velocity - playerRb.velocity)*120f, ForceMode.Acceleration);
-				playerRb.velocity = slopeMoveVector + hit.rigidbody.velocity*1.4f;
+				playerRb.velocity = moveVector + hit.rigidbody.velocity*1.4f;
 				if (Vector3.Angle(hit.rigidbody.velocity, moveVector) > 160f || Vector3.Angle(hit.rigidbody.velocity, moveVector) < 20f)
 				{
-					//Debug.Log(Vector3.Angle(hit.rigidbody.velocity, slopeMoveVector));
 					playerRb.AddForce(moveVector*5f, ForceMode.VelocityChange);
                 }
-				//playerRb.AddForce((hit.rigidbody.velocity) * 0.5f, ForceMode.VelocityChange);
 			}
         }
-        
-        
     }
-
 }

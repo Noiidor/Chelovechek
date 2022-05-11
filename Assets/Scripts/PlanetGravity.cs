@@ -25,12 +25,11 @@ public class PlanetGravity : MonoBehaviour
 
             if (affectedRigidbody.useGravity)
             {
+                if (affectedRigidbody.GetComponent<PlayerController>())
+                {
+                    playerGravStrenght = gravStrenght;
+                }
                 affectedRigidbody.AddForce(gravDirection * gravStrenght, ForceMode.Acceleration);
-            }
-            
-            if (affectedRigidbody.GetComponent<PlayerController>())
-            {
-                playerGravStrenght = gravStrenght;
             }
         }
     }
