@@ -1,5 +1,18 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-677465306502733741
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 4
 --- !u!21 &2100000
 Material:
   serializedVersion: 6
@@ -7,8 +20,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: PlanetSmall
-  m_Shader: {fileID: -6465566751694194690, guid: a0dd7610a1b954a468e6ca4caee505ba, type: 3}
+  m_Name: PlanetMaterial
+  m_Shader: {fileID: -6465566751694194690, guid: 88dd37ce548a69d4d802c18f9e54e469, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -76,8 +89,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - Vector1_99708bf4e5c642129007fc9ecece0cef: 0.77
-    - Vector1_d4656fd9f31b42ec9c51e0c24fd57510: 12.85
+    - Vector1_621b836596804055b14aa01e3fe1685a: 99.8
+    - Vector1_99708bf4e5c642129007fc9ecece0cef: 0.41
+    - Vector1_a95164ac394c42f592d82e55ab6ffc2d: 6.7
+    - Vector1_d4656fd9f31b42ec9c51e0c24fd57510: 0.64
     - _AlphaClip: 0
     - _Blend: 0
     - _BumpScale: 1
@@ -105,24 +120,10 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - Color_7b73b9b182e34f69b71002a1634ce03d: {r: 0.61246616, g: 0.11113301, b: 2.617801, a: 0}
-    - Vector2_2f02a87b476240219d93a38834f20c91: {r: 80, g: 80, b: 0, a: 0}
-    - Vector3_299e9c9cda984d6bae59d0f0a1672d46: {r: -0.07, g: 0, b: 0, a: 0}
+    - Vector3_299e9c9cda984d6bae59d0f0a1672d46: {r: 0, g: 0, b: 0, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+    - _center: {r: 267.7, g: 206.2, b: 0, a: 0}
   m_BuildTextureStacks: []
---- !u!114 &5879963198860934833
-MonoBehaviour:
-  m_ObjectHideFlags: 11
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  version: 4
