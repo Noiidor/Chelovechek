@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Planet : MonoBehaviour
+public class SphereGenerator : MonoBehaviour
 {
 
     [Range(2, 256)]
@@ -11,7 +11,7 @@ public class Planet : MonoBehaviour
 
     [SerializeField, HideInInspector]
     MeshFilter[] meshFilters;
-    TerrainFace[] terrainFaces;
+    SphereFace[] terrainFaces;
 
     void Initialize()
     {
@@ -19,7 +19,7 @@ public class Planet : MonoBehaviour
         {
             meshFilters = new MeshFilter[6];
         }
-        terrainFaces = new TerrainFace[6];
+        terrainFaces = new SphereFace[6];
 
         Vector3[] directions = { Vector3.up, Vector3.down, Vector3.left, Vector3.right, Vector3.forward, Vector3.back };
 
@@ -37,7 +37,7 @@ public class Planet : MonoBehaviour
                 meshFilters[i].sharedMesh = mesh;
                 meshObj.AddComponent<MeshCollider>().sharedMesh = mesh;
             }
-            terrainFaces[i] = new TerrainFace(meshFilters[i].sharedMesh, resolution, radius, directions[i]);
+            terrainFaces[i] = new SphereFace(meshFilters[i].sharedMesh, resolution, radius, directions[i]);
         }
     }
 
@@ -49,7 +49,7 @@ public class Planet : MonoBehaviour
 
     void GenerateMesh()
     {
-        foreach (TerrainFace face in terrainFaces)
+        foreach (SphereFace face in terrainFaces)
         {
             face.ConstructMesh();
         }

@@ -27,7 +27,7 @@ float fbm(int numLayers, float lacunarity, float persistence, float scale, float
     {
         float3 surfacePosition = normalize(pos - center) * noiseRadius; //for 2d sample of noise
 
-        float n = 1 - abs(snoise(pos * frequency) * 2 - 1);
+        float n = 1 - abs(snoise(surfacePosition * frequency) * 2 - 1);
 		//n*=n;
         noise += n * amplitude;
 
@@ -49,7 +49,7 @@ float calculateDensity(int3 cell) {
 	float density = length(worldPos) / (maxD + fudge) - 0.5;
 
 	// Noise
-	float noise = fbm(6, 2, 0.5, noiseScale, worldPos) * noiseHeightMultiplier;
+	float noise = fbm(6, 2, 0.5, noiseScale, worldPos + center) * noiseHeightMultiplier;
 
 	density += noise;
 

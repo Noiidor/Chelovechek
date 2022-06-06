@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour
 	private float savedColliderHeight;
 	private float savedCameraHeight;
 	private TimeStopAbility tStopAbility;
+	private bool isJumping;
 
 
 	//Переменные, значение которым присваивается только 1 раз
@@ -69,7 +70,8 @@ public class PlayerController : MonoBehaviour
 
 	void FixedUpdate()
 	{
-		HandleStairs();
+		//HandleStairs();
+		//HandleStairsSimple();
 		SprintMovement();
 		HandleMovement();
 		AirFall();
@@ -115,6 +117,7 @@ public class PlayerController : MonoBehaviour
 		//Debug.DrawRay(bodyCollider.bounds.center, moveVector, Color.red, 0.03f, false);
 		//Debug.DrawRay(bodyCollider.bounds.center, -slopeHit.normal, Color.blue, 0.03f, false);
 		//Debug.Log(playerRb.velocity.magnitude);
+		Debug.Log(playerRb.drag);
 	}
 
 	private void HandleMovement()
@@ -227,13 +230,13 @@ public class PlayerController : MonoBehaviour
 		}
 	}
 
-	private void StairsMovement()
+	private void HandleStairsSimple()
 	{
 		RaycastHit groundHit;
 		Vector3 rayHitPoint;
 		Vector3 targetPos;
 
-		Physics.Raycast((bodyCollider.bounds.center - new Vector3(0f, bodyCollider.bounds.extents.y - 0.5f, 0f)), -transform.up, out groundHit, 1.5f, groundLayerMask, QueryTriggerInteraction.Ignore);
+		Physics.Raycast((bodyCollider.bounds.center - new Vector3(0f, bodyCollider.bounds.extents.y - 0.5f, 0f)), -transform.up, out groundHit, 0.5f, groundLayerMask, QueryTriggerInteraction.Ignore);
 		
 		if (groundHit.normal == Vector3.zero)
 		{
@@ -267,6 +270,7 @@ public class PlayerController : MonoBehaviour
 		//Coyote time
 		if (jumpBufferCounter > 0f && IsGrounded())
 		{
+			isJumping = true;
 			playerRb.velocity = new Vector3(playerRb.velocity.x, 0f, playerRb.velocity.z);
 			playerRb.AddForce(transform.up * jumpStrenght, ForceMode.Impulse);
 		}
@@ -280,17 +284,22 @@ public class PlayerController : MonoBehaviour
 		}
 		else
 		{
+			isJumping = false;
 			jumpBufferCounter -= Time.deltaTime;
 		}
 	}
 
 	private void DragControl()
 	{
-		if (IsGrounded())
+		if (isGrounded && moveVector == Vector3.zero && !isJumping && playerRb.velocity.magnitude < 2f)
 		{
-			playerRb.drag = 10f;
+			playerRb.drag = 100f;
 			
 		}
+		else if (isGrounded && playerRb.velocity.magnitude < 15f)
+		{
+			playerRb.drag = 10f;
+        }
 		else
 		{
 			playerRb.drag = 1f;

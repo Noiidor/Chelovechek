@@ -64,8 +64,11 @@ public class PlanetGravity : MonoBehaviour
     
     private void Awake()
     {
-        GetComponent<Rigidbody>().isKinematic = true;
-        GetComponent<SphereCollider>().isTrigger = true;
+        Rigidbody planetRb = GetComponent<Rigidbody>();
+        planetRb.isKinematic = true;
+        SphereCollider gravTrigger = GetComponent<SphereCollider>();
+        gravTrigger.isTrigger = true;
+        
     }
 
 }

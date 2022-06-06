@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TerrainFace
+public class SphereFace
 {
     
     Mesh mesh;
@@ -12,7 +12,7 @@ public class TerrainFace
     Vector3 axisA;
     Vector3 axisB;
 
-    public TerrainFace(Mesh mesh, int resolution, float radius, Vector3 localUp)
+    public SphereFace(Mesh mesh, int resolution, float radius, Vector3 localUp)
     {
         this.radius = radius;
         this.mesh = mesh;

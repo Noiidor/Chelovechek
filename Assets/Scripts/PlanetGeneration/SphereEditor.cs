@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(Planet))]
-public class PlanetEditor : Editor
+[CustomEditor(typeof(SphereGenerator))]
+public class SphereEditor : Editor
 {
-    Planet planet;
+    SphereGenerator planet;
 
     public override void OnInspectorGUI()
     {
@@ -27,6 +27,6 @@ public class PlanetEditor : Editor
 
     private void OnEnable()
     {
-        planet = (Planet)target;
+        planet = (SphereGenerator)target;
     }
 }
