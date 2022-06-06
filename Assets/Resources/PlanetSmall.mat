@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: PlanetSmall
-  m_Shader: {fileID: -6465566751694194690, guid: a0dd7610a1b954a468e6ca4caee505ba, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 3cc43653fc5b5c742a34e5f13bbaee62, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
