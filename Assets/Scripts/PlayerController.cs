@@ -291,19 +291,38 @@ public class PlayerController : MonoBehaviour
 
 	private void DragControl()
 	{
-		if (isGrounded && moveVector == Vector3.zero && !isJumping && playerRb.velocity.magnitude < 2f)
-		{
-			playerRb.drag = 100f;
-			
-		}
-		else if (isGrounded && playerRb.velocity.magnitude < 15f)
-		{
-			playerRb.drag = 10f;
+        if (isGrounded)
+        {
+            if (moveVector == Vector3.zero && !isJumping && playerRb.velocity.magnitude < 3f)
+            {
+				playerRb.drag = 100f;
+			}
+            else if (playerRb.velocity.magnitude > 25f)
+            {
+				playerRb.drag = 5f;
+            }
+            else
+            {
+				playerRb.drag = 10f;
+			}
         }
-		else
-		{
+        else
+        {
 			playerRb.drag = 1f;
 		}
+		//if (isGrounded && moveVector == Vector3.zero && !isJumping && playerRb.velocity.magnitude < 2f)
+		//{
+		//	playerRb.drag = 100f;
+			
+		//}
+		//else if (isGrounded && playerRb.velocity.magnitude < 15f)
+		//{
+		//	playerRb.drag = 10f;
+  //      }
+		//else
+		//{
+		//	playerRb.drag = 1f;
+		//}
 	}
 
 	private void AirFall()
