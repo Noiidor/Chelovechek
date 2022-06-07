@@ -13,12 +13,15 @@ public class PlayerController : MonoBehaviour
 	private Transform groundCheck;
 	private float savedColliderHeight;
 	private float savedCameraHeight;
-	
+	private TimeStopAbility tStopAbility;
+	private bool isJumping;
+
 
 	//Переменные, значение которым присваивается только 1 раз
 	private float xRotation = 0f;
 	private float jumpBufferTime = 0.1f;
 	private float dist = 2.5f;
+	private bool terraUpdate = false;
 
 	[HideInInspector] public Rigidbody playerRb;
 	[HideInInspector] public bool onRb;
@@ -38,7 +41,7 @@ public class PlayerController : MonoBehaviour
 	[SerializeField] private CapsuleCollider bodyCollider;
 	[SerializeField] private LayerMask groundLayerMask;
 	[SerializeField] private LayerMask rigidbodyMask;
-	[SerializeField] private TimeStopAbility tStopAbility;
+	
 	[Space]
 
 	[Header("Variables")]
@@ -61,12 +64,14 @@ public class PlayerController : MonoBehaviour
 		savedCameraHeight = camera.transform.localPosition.y;
 		stairsCheck = transform.Find("StairsCheck");
 		groundCheck = transform.Find("GroundCheck");
+		tStopAbility = FindObjectOfType<TimeStopAbility>();
 		playerRb = GetComponent<Rigidbody>();
 	}
 
 	void FixedUpdate()
 	{
-		HandleStairs();
+		//HandleStairs();
+		//HandleStairsSimple();
 		SprintMovement();
 		HandleMovement();
 		AirFall();
@@ -86,6 +91,18 @@ public class PlayerController : MonoBehaviour
 		MyInputs();
 	}
 
+	void LateUpdate()
+	{
+		if (terraUpdate)
+		{
+			Vector3 localUp = MathUtility.LocalToWorldVector(playerRb.rotation, Vector3.up);
+			//Debug.Log("Update");
+			TerraTest(localUp);
+			terraUpdate = false;
+			//Debug.Break();
+		}
+	}
+
 	private void MyInputs()
 	{
 		if (Input.GetKeyUp(pullKey))
@@ -100,6 +117,7 @@ public class PlayerController : MonoBehaviour
 		//Debug.DrawRay(bodyCollider.bounds.center, moveVector, Color.red, 0.03f, false);
 		//Debug.DrawRay(bodyCollider.bounds.center, -slopeHit.normal, Color.blue, 0.03f, false);
 		//Debug.Log(playerRb.velocity.magnitude);
+		Debug.Log(playerRb.drag);
 	}
 
 	private void HandleMovement()
@@ -212,13 +230,13 @@ public class PlayerController : MonoBehaviour
 		}
 	}
 
-	private void StairsMovement()
+	private void HandleStairsSimple()
 	{
 		RaycastHit groundHit;
 		Vector3 rayHitPoint;
 		Vector3 targetPos;
 
-		Physics.Raycast((bodyCollider.bounds.center - new Vector3(0f, bodyCollider.bounds.extents.y - 0.5f, 0f)), -transform.up, out groundHit, 1.5f, groundLayerMask, QueryTriggerInteraction.Ignore);
+		Physics.Raycast((bodyCollider.bounds.center - new Vector3(0f, bodyCollider.bounds.extents.y - 0.5f, 0f)), -transform.up, out groundHit, 0.5f, groundLayerMask, QueryTriggerInteraction.Ignore);
 		
 		if (groundHit.normal == Vector3.zero)
 		{
@@ -252,6 +270,7 @@ public class PlayerController : MonoBehaviour
 		//Coyote time
 		if (jumpBufferCounter > 0f && IsGrounded())
 		{
+			isJumping = true;
 			playerRb.velocity = new Vector3(playerRb.velocity.x, 0f, playerRb.velocity.z);
 			playerRb.AddForce(transform.up * jumpStrenght, ForceMode.Impulse);
 		}
@@ -265,21 +284,45 @@ public class PlayerController : MonoBehaviour
 		}
 		else
 		{
+			isJumping = false;
 			jumpBufferCounter -= Time.deltaTime;
 		}
 	}
 
 	private void DragControl()
 	{
-		if (IsGrounded())
-		{
-			playerRb.drag = 10f;
-			
-		}
-		else
-		{
+        if (isGrounded)
+        {
+            if (moveVector == Vector3.zero && !isJumping && playerRb.velocity.magnitude < 3f)
+            {
+				playerRb.drag = 100f;
+			}
+            else if (playerRb.velocity.magnitude > 25f)
+            {
+				playerRb.drag = 5f;
+            }
+            else
+            {
+				playerRb.drag = 10f;
+			}
+        }
+        else
+        {
 			playerRb.drag = 1f;
 		}
+		//if (isGrounded && moveVector == Vector3.zero && !isJumping && playerRb.velocity.magnitude < 2f)
+		//{
+		//	playerRb.drag = 100f;
+			
+		//}
+		//else if (isGrounded && playerRb.velocity.magnitude < 15f)
+		//{
+		//	playerRb.drag = 10f;
+  //      }
+		//else
+		//{
+		//	playerRb.drag = 1f;
+		//}
 	}
 
 	private void AirFall()
@@ -381,5 +424,36 @@ public class PlayerController : MonoBehaviour
 				}
 			}
 		}
+	}
+
+	public void NotifyTerrainChanged(Vector3 point, float radius)
+	{
+		float dstFromCam = (point - camera.transform.position).magnitude;
+		if (dstFromCam < radius + 3)
+		{
+			terraUpdate = true;
+		}
+	}
+
+	void TerraTest(Vector3 localUp)
+	{
+		Vector3 hp;
+		float heightOffset = 5f;
+		Vector3 a = transform.position - localUp * (bodyCollider.height / 2 + bodyCollider.radius - heightOffset);
+		Vector3 b = transform.position + localUp * (bodyCollider.height / 2 + bodyCollider.radius + heightOffset);
+		RaycastHit hitInfo;
+
+		if (Physics.CapsuleCast(a, b, bodyCollider.radius, -localUp, out hitInfo, heightOffset, groundLayerMask))
+		{
+			hp = hitInfo.point;
+			Vector3 newPos = (hp + transform.up * 1);
+			float deltaY = Vector3.Dot(transform.up, (newPos - transform.position));
+			if (deltaY > 0.05f)
+			{
+				transform.position = newPos;
+				isGrounded = true;
+			}
+		}
+
 	}
 }

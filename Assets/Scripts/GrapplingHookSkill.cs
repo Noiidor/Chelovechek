@@ -10,6 +10,7 @@ public class GrapplingHookSkill : MonoBehaviour
     private LineRenderer line;
     private Vector3 hitPoint;
     private Rigidbody hitRb;
+    private bool airFallCanChange;
 
     private void Start()
     {
@@ -29,7 +30,11 @@ public class GrapplingHookSkill : MonoBehaviour
             hitPoint = Vector3.zero;
             hitRb = null;
             line.enabled = false;
-            pCont.airFallingEnabled = true;
+            if (airFallCanChange)
+            {
+                pCont.airFallingEnabled = true;
+            }
+            
         }
     }
 
@@ -65,6 +70,10 @@ public class GrapplingHookSkill : MonoBehaviour
             }
             else
             {
+                if (!pCont.airFallingEnabled)
+                {
+                    airFallCanChange = false;
+                }
                 pCont.airFallingEnabled = false;
                 pCont.playerRb.AddForce((hitPoint - transform.position) * 25f, ForceMode.Force);
                 line.SetPosition(0, pCont.camera.ViewportToWorldPoint(new Vector3(0.8f, 0.25f, 0.5f)));

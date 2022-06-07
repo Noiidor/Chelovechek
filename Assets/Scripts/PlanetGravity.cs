@@ -2,16 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteInEditMode]
+[RequireComponent(typeof(Rigidbody), typeof(SphereCollider))]
 public class PlanetGravity : MonoBehaviour
 {
 
     private HashSet<Rigidbody> affectedRigidbodies = new HashSet<Rigidbody>();
     private Rigidbody planetRb;
     [HideInInspector] public float playerGravStrenght;
-    [SerializeField] private PlayerGravityFacing playerGravFacing;
+    private PlayerGravityFacing playerGravFacing;
 
     void Start()
     {
+        playerGravFacing = FindObjectOfType<PlayerGravityFacing>();
         planetRb = GetComponent<Rigidbody>();
     }
 
@@ -56,6 +59,16 @@ public class PlanetGravity : MonoBehaviour
         {
             playerGravFacing.planetGrav.Remove(this);
         }
+    }
+
+    
+    private void Awake()
+    {
+        Rigidbody planetRb = GetComponent<Rigidbody>();
+        planetRb.isKinematic = true;
+        SphereCollider gravTrigger = GetComponent<SphereCollider>();
+        gravTrigger.isTrigger = true;
+        
     }
 
 }
